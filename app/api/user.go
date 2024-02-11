@@ -4,9 +4,10 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/Housiadas/simple-banking-system/business/db"
 	"github.com/Housiadas/simple-banking-system/foundation/password"
-	"github.com/gin-gonic/gin"
 )
 
 func (server *Server) createUser(ctx *gin.Context) {

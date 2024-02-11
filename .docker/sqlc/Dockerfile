@@ -1,0 +1,10 @@
+ARG UID
+ARG GID
+
+FROM sqlc/sqlc
+
+WORKDIR /app
+
+COPY . .
+
+USER $UID:$GID

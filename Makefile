@@ -4,11 +4,19 @@
 # Include variables from the local .env file
 include ./app.env
 
+VERSION := 1.22
+UID := $(shell id -u)
+GID := $(shell id -g)
+
 APP_MODULE := github.com/Housiadas/simple-banking-system
-DOCKER_COMPOSE_LOCAL := docker-compose -f ./.docker/local/docker-compose.yml
-MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm utility migrate
-SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm utility sqlc
 INPUT ?= $(shell bash -c 'read -p "Insert name: " name; echo $$name')
+CURRENT_TIME := $(shell date --iso-8601=seconds)
+GIT_VERSION := $(shell git describe --always --dirty --tags --long)
+LINKER_FLAGS := "-s -X main.buildTime=${CURRENT_TIME} -X main.version=${GIT_VERSION}"
+
+DOCKER_COMPOSE_LOCAL := docker-compose -f ./docker-compose.yml
+MIGRATE := $(DOCKER_COMPOSE_LOCAL) run --rm migrate
+SQLC := $(DOCKER_COMPOSE_LOCAL) run --rm sqlc
 
 # ==================================================================================== #
 # HELPERS
@@ -20,19 +28,18 @@ help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
 
-confirm:
-	@echo -n 'Are you sure? [y/N] ' && read ans && [ $${ans:-N} = y ]
-
 # ==================================================================================== #
 # DEVELOPMENT
 # ==================================================================================== #
 
-## docker/build: Build all the containers
+## docker/build: Build the application
 .PHONY: docker/build
 docker/build:
-	$(DOCKER_COMPOSE_LOCAL) build --no-cache --pull
+	docker build --target application -t banking-api:local \
+		--build-arg VERSION=$(VERSION) \
+ 		-f .docker/app/Dockerfile .
 
-## docker/up: Start all the containers for the app
+## docker/up: Start all the containers for the application
 .PHONY: docker/up
 docker/up:
 	$(DOCKER_COMPOSE_LOCAL) up -d db redis
@@ -102,7 +109,7 @@ db/sqlc/generate:
 # QUALITY CONTROL
 # ==================================================================================== #
 
-# update: update dependeniecs
+# update: update dependencies
 .PHONY: update
 update:
 	go get -u ./...
@@ -141,13 +148,8 @@ coverage:
 # BUILD
 # ==================================================================================== #
 
-current_time = $(shell date --iso-8601=seconds)
-git_description = $(shell git describe --always --dirty --tags --long)
-linker_flags = '-s -X main.buildTime=${current_time} -X main.version=${git_description}'
-
 ## build/api: build the cmd/api application
 .PHONY: build/api
 build/api:
-	@echo 'Building cmd/api...'
-	go build -ldflags=${linker_flags} -o=./bin/api ./cmd/api
-	GOOS=linux GOARCH=amd64 go build -ldflags=${linker_flags} -o=./bin/linux_amd64/api ./cmd/api
+	cd app & \
+	go build -ldflags=${LINKER_FLAGS} -o=./banking-api

@@ -11,14 +11,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
+
 	"github.com/Housiadas/simple-banking-system/business/db"
 	mockdb "github.com/Housiadas/simple-banking-system/business/db/mock"
 	"github.com/Housiadas/simple-banking-system/business/role"
 	"github.com/Housiadas/simple-banking-system/business/token"
 	"github.com/Housiadas/simple-banking-system/foundation/random"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
 )
 
 func TestGetAccountAPI(t *testing.T) {
