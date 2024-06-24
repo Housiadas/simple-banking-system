@@ -1,7 +1,8 @@
-package auth
+package authbus
 
 import (
 	"encoding/json"
+
 	"github.com/google/uuid"
 )
 

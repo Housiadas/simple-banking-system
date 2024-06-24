@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 )
@@ -47,15 +47,15 @@ func GetApiVersion(ctx context.Context) string {
 	return v
 }
 
-func SetClaims(ctx context.Context, claims auth.Claims) context.Context {
+func SetClaims(ctx context.Context, claims authbus.Claims) context.Context {
 	return context.WithValue(ctx, claimKey, claims)
 }
 
 // GetClaims returns the claims from the context.
-func GetClaims(ctx context.Context) auth.Claims {
-	v, ok := ctx.Value(claimKey).(auth.Claims)
+func GetClaims(ctx context.Context) authbus.Claims {
+	v, ok := ctx.Value(claimKey).(authbus.Claims)
 	if !ok {
-		return auth.Claims{}
+		return authbus.Claims{}
 	}
 	return v
 }

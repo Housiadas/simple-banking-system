@@ -1,10 +1,10 @@
-package auth
+package authbus
 
 import (
 	_ "embed"
 )
 
-// These the current set of rules we have for auth.
+// These the current set of rules we have for authbus.
 const (
 	RuleAuthenticate   = "auth"
 	RuleAny            = "rule_any"

@@ -9,8 +9,8 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/foundation/keystore"
@@ -45,13 +45,13 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 		return fmt.Errorf("reading keys: %w", err)
 	}
 
-	authCfg := auth.Config{
+	authCfg := authbus.Config{
 		Log:       log,
 		DB:        db,
 		KeyLookup: ks,
 	}
 
-	a, err := auth.New(authCfg)
+	a, err := authbus.New(authCfg)
 	if err != nil {
 		return fmt.Errorf("constructing authapi: %w", err)
 	}
@@ -67,7 +67,7 @@ func GenToken(log *logger.Logger, dbConfig sqldb.Config, keyPath string, userID 
 	// nbf (not before time): Time before which the JWT must not be accepted for processing
 	// iat (issued at time): Time at which the JWT was issued; can be used to determine age of the JWT
 	// jti (JWT ID): Unique identifier; can be used to prevent the JWT from being replayed (allows a token to be used only once)
-	claims := auth.Claims{
+	claims := authbus.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   usr.ID.String(),
 			Issuer:    "service project",

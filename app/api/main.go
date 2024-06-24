@@ -14,22 +14,21 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/config"
 	"github.com/Housiadas/backend-system/business/data/sqldb"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus/stores/productdb"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus/stores/userdb"
 	"github.com/Housiadas/backend-system/business/web"
 	"github.com/Housiadas/backend-system/business/web/mid"
+	_ "github.com/Housiadas/backend-system/docs"
 	"github.com/Housiadas/backend-system/foundation/debug"
 	"github.com/Housiadas/backend-system/foundation/kafka"
 	"github.com/Housiadas/backend-system/foundation/keystore"
 	"github.com/Housiadas/backend-system/foundation/logger"
 	"github.com/Housiadas/backend-system/foundation/tracer"
-
-	_ "github.com/Housiadas/backend-system/docs"
 )
 
 /*
@@ -135,13 +134,13 @@ func run(ctx context.Context, log *logger.Logger) error {
 		return fmt.Errorf("reading keys: %w", err)
 	}
 
-	authCfg := auth.Config{
+	authCfg := authbus.Config{
 		Log:       log,
 		DB:        db,
 		KeyLookup: ks,
 	}
 
-	authSrv, err := auth.New(authCfg)
+	authSrv, err := authbus.New(authCfg)
 	if err != nil {
 		return fmt.Errorf("constructing authapi: %w", err)
 	}
@@ -223,7 +222,7 @@ func run(ctx context.Context, log *logger.Logger) error {
 		Build:   build,
 		Cors:    cfg.Cors,
 		Web: handler.Web{
-			Mid:     mid.New(authSrv, midBusiness, log),
+			Mid:     mid.New(midBusiness, log),
 			Respond: respond,
 		},
 		App: handler.App{

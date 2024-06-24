@@ -1,4 +1,4 @@
-package auth_test
+package authbus_test
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 
-	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/foundation/logger"
 )
@@ -27,7 +27,7 @@ func Test_Auth(t *testing.T) {
 		teardown()
 	}()
 
-	ath, err := auth.New(auth.Config{
+	ath, err := authbus.New(authbus.Config{
 		Log:       log,
 		DB:        db,
 		KeyLookup: &keyStore{},
@@ -45,9 +45,9 @@ func Test_Auth(t *testing.T) {
 	t.Run("test6", test6(ath))
 }
 
-func test1(ath *auth.Auth) func(t *testing.T) {
+func test1(ath *authbus.Auth) func(t *testing.T) {
 	f := func(t *testing.T) {
-		claims := auth.Claims{
+		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
 				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
@@ -69,17 +69,17 @@ func test1(ath *auth.Auth) func(t *testing.T) {
 
 		userID := uuid.MustParse(claims.Subject)
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOnly)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAdminOnly)
 		if err != nil {
 			t.Errorf("Should be able to authorize the Roles.Admin claims : %s", err)
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleUserOnly)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleUserOnly)
 		if err == nil {
 			t.Error("Should NOT be able to authorize the Roles.User claim")
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAdminOrSubject)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with Roles.Admin only : %s", err)
 		}
@@ -88,9 +88,9 @@ func test1(ath *auth.Auth) func(t *testing.T) {
 	return f
 }
 
-func test2(ath *auth.Auth) func(t *testing.T) {
+func test2(ath *authbus.Auth) func(t *testing.T) {
 	f := func(t *testing.T) {
-		claims := auth.Claims{
+		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
 				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
@@ -112,22 +112,22 @@ func test2(ath *auth.Auth) func(t *testing.T) {
 
 		userID := uuid.MustParse(claims.Subject)
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleUserOnly)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleUserOnly)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleUserOnly claim with Roles.User only : %s", err)
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOnly)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAdminOnly)
 		if err == nil {
 			t.Error("Should NOT be able to authorize the RuleAdminOnly claim with Roles.User only")
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAdminOrSubject)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAdminOrSubject claim with Roles.User only : %s", err)
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAny)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User only : %s", err)
 		}
@@ -136,9 +136,9 @@ func test2(ath *auth.Auth) func(t *testing.T) {
 	return f
 }
 
-func test3(ath *auth.Auth) func(t *testing.T) {
+func test3(ath *authbus.Auth) func(t *testing.T) {
 	f := func(t *testing.T) {
-		claims := auth.Claims{
+		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
 				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
@@ -160,7 +160,7 @@ func test3(ath *auth.Auth) func(t *testing.T) {
 
 		userID := uuid.MustParse("9e979baa-61c9-4b50-81f2-f216d53f5c15")
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAdminOrSubject)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAdminOrSubject)
 		if err == nil {
 			t.Error("Should NOT be able to authorize the RuleAdminOrSubject claim with Roles.User only and different userID")
 		}
@@ -169,9 +169,9 @@ func test3(ath *auth.Auth) func(t *testing.T) {
 	return f
 }
 
-func test4(ath *auth.Auth) func(t *testing.T) {
+func test4(ath *authbus.Auth) func(t *testing.T) {
 	f := func(t *testing.T) {
-		claims := auth.Claims{
+		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
 				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
@@ -192,7 +192,7 @@ func test4(ath *auth.Auth) func(t *testing.T) {
 			t.Fatalf("Should be able to authenticate the claims : %s", err)
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAny)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User and Roles.Admin : %s", err)
 		}
@@ -201,9 +201,9 @@ func test4(ath *auth.Auth) func(t *testing.T) {
 	return f
 }
 
-func test5(ath *auth.Auth) func(t *testing.T) {
+func test5(ath *authbus.Auth) func(t *testing.T) {
 	f := func(t *testing.T) {
-		claims := auth.Claims{
+		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
 				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
@@ -224,7 +224,7 @@ func test5(ath *auth.Auth) func(t *testing.T) {
 			t.Fatalf("Should be able to authenticate the claims : %s", err)
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAny)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.User only : %s", err)
 		}
@@ -233,9 +233,9 @@ func test5(ath *auth.Auth) func(t *testing.T) {
 	return f
 }
 
-func test6(ath *auth.Auth) func(t *testing.T) {
+func test6(ath *authbus.Auth) func(t *testing.T) {
 	f := func(t *testing.T) {
-		claims := auth.Claims{
+		claims := authbus.Claims{
 			RegisteredClaims: jwt.RegisteredClaims{
 				Issuer:    ath.Issuer(),
 				Subject:   "5cf37266-3473-4006-984f-9325122678b7",
@@ -256,7 +256,7 @@ func test6(ath *auth.Auth) func(t *testing.T) {
 			t.Fatalf("Should be able to authenticate the claims : %s", err)
 		}
 
-		err = ath.Authorize(context.Background(), parsedClaims, userID, auth.RuleAny)
+		err = ath.Authorize(context.Background(), parsedClaims, userID, authbus.RuleAny)
 		if err != nil {
 			t.Errorf("Should be able to authorize the RuleAny any claim with Roles.Admin only : %s", err)
 		}

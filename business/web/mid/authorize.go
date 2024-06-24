@@ -3,12 +3,11 @@ package mid
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
 
-	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
@@ -31,13 +30,13 @@ func (m *Mid) Authorize(rule string) func(next http.Handler) http.Handler {
 				return
 			}
 
-			authData := auth.Authorize{
+			authData := authbus.Authorize{
 				Claims: web.GetClaims(ctx),
 				UserID: userID,
 				Rule:   rule,
 			}
 
-			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
+			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize mid: authorize", err)
 
@@ -100,15 +99,13 @@ func (m *Mid) AuthorizeUser(rule string) func(next http.Handler) http.Handler {
 				ctx = web.SetUser(ctx, usr)
 			}
 
-			authData := auth.Authorize{
+			authData := authbus.Authorize{
 				Claims: web.GetClaims(ctx),
 				UserID: userID,
 				Rule:   rule,
 			}
 
-			fmt.Println(web.GetClaims(ctx))
-			fmt.Println(web.GetUser(ctx))
-			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
+			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize user mid: authorize", err)
 
@@ -173,13 +170,13 @@ func (m *Mid) AuthorizeProduct(rule string) func(next http.Handler) http.Handler
 				ctx = web.SetProduct(ctx, prd)
 			}
 
-			authData := auth.Authorize{
+			authData := authbus.Authorize{
 				Claims: web.GetClaims(ctx),
 				UserID: userID,
 				Rule:   rule,
 			}
 
-			if err := m.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
+			if err := m.Bus.Auth.Authorize(ctx, authData.Claims, authData.UserID, authData.Rule); err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "authorize product mid: authorize", err)
 

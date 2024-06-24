@@ -16,7 +16,7 @@ func (m *Mid) Bearer() func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			claims, err := m.Auth.Authenticate(ctx, r.Header.Get("authorization"))
+			claims, err := m.Bus.Auth.Authenticate(ctx, r.Header.Get("authorization"))
 			if err != nil {
 				err = errs.New(errs.Unauthenticated, err)
 				m.Log.Error(ctx, "bearer mid: unauthenticated", errs.Unauthenticated)

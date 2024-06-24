@@ -7,7 +7,7 @@ import (
 	"github.com/riandyrn/otelchi"
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 )
 
 // Routes returns applications router
@@ -15,13 +15,13 @@ func (h *Handler) Routes() *chi.Mux {
 	mid := h.Web.Mid
 
 	authenticate := mid.Bearer()
-	ruleAny := mid.Authorize(auth.RuleAny)
-	ruleUserOnly := mid.Authorize(auth.RuleUserOnly)
-	ruleAdmin := mid.Authorize(auth.RuleAdminOnly)
+	ruleAny := mid.Authorize(authbus.RuleAny)
+	ruleUserOnly := mid.Authorize(authbus.RuleUserOnly)
+	ruleAdmin := mid.Authorize(authbus.RuleAdminOnly)
 
-	ruleAuthorizeUser := mid.AuthorizeUser(auth.RuleAdminOrSubject)
-	ruleAuthorizeAdmin := mid.AuthorizeUser(auth.RuleAdminOnly)
-	ruleAuthorizeProduct := mid.AuthorizeProduct(auth.RuleAdminOrSubject)
+	ruleAuthorizeUser := mid.AuthorizeUser(authbus.RuleAdminOrSubject)
+	ruleAuthorizeAdmin := mid.AuthorizeUser(authbus.RuleAdminOnly)
+	ruleAuthorizeProduct := mid.AuthorizeProduct(authbus.RuleAdminOrSubject)
 
 	apiRouter := chi.NewRouter()
 	apiRouter.Use(
@@ -52,7 +52,7 @@ func (h *Handler) Routes() *chi.Mux {
 			u.With(ruleAuthorizeAdmin).Get("/", h.Web.Respond.Respond(h.userQuery))
 			u.With(ruleAuthorizeUser).Get("/{user_id}", h.Web.Respond.Respond(h.userQueryByID))
 			u.With(ruleAdmin).Post("/users", h.Web.Respond.Respond(h.userCreate))
-			u.With(ruleAuthorizeAdmin).Put("/role/{user_id}", h.Web.Respond.Respond(h.updateRole))
+			u.With(ruleAdmin).Put("/role/{user_id}", h.Web.Respond.Respond(h.updateRole))
 			u.With(ruleAuthorizeUser).Put("/{user_id}", h.Web.Respond.Respond(h.userUpdate))
 			u.With(ruleAuthorizeUser).Delete("/{user_id}", h.Web.Respond.Respond(h.userDelete))
 		})

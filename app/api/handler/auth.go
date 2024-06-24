@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/validation"
 	"github.com/Housiadas/backend-system/business/web"
@@ -43,7 +43,7 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 	// nbf (not before time): Time before which the JWT must not be accepted for processing
 	// iat (issued at time): Time at which the JWT was issued; can be used to determine age of the JWT
 	// jti (JWT ID): Unique identifier; can be used to prevent the JWT from being replayed (allows a token to be used only once)
-	claims := auth.Claims{
+	claims := authbus.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   usr.ID,
 			Issuer:    "service project",
@@ -61,13 +61,13 @@ func (h *Handler) authenticate(ctx context.Context, _ http.ResponseWriter, r *ht
 		return nil, fmt.Errorf("generating token: %w", err)
 	}
 
-	return auth.AuthenticateResp{
+	return authbus.AuthenticateResp{
 		Token: token,
 	}, nil
 }
 
 func (h *Handler) authorize(ctx context.Context, _ http.ResponseWriter, r *http.Request) (web.Encoder, error) {
-	var authData auth.Authorize
+	var authData authbus.Authorize
 	if err := web.Decode(r, &authData); err != nil {
 		return nil, errs.New(errs.FailedPrecondition, err)
 	}

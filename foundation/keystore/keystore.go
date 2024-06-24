@@ -1,4 +1,4 @@
-// Package keystore implements the auth.KeyLookup interface. This implements
+// Package keystore implements the authbus.KeyLookup interface. This implements
 // an in-memory keystore for JWT support.
 package keystore
 

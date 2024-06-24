@@ -6,7 +6,7 @@ import (
 	"errors"
 	"net/mail"
 
-	"github.com/Housiadas/backend-system/business/auth"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/sys/errs"
 	"github.com/Housiadas/backend-system/business/sys/order"
@@ -18,13 +18,13 @@ import (
 // App manages the set of app layer api functions for the user domain.
 type App struct {
 	userBus *userbus.Business
-	auth    *auth.Auth
+	authbus *authbus.Auth
 }
 
 // NewApp constructs a user app API for use.
-func NewApp(userBus *userbus.Business, auth *auth.Auth) *App {
+func NewApp(userBus *userbus.Business, authbus *authbus.Auth) *App {
 	return &App{
-		auth:    auth,
+		authbus: authbus,
 		userBus: userBus,
 	}
 }
@@ -46,13 +46,13 @@ func (c *App) Authenticate(ctx context.Context, authUser AuthenticateUser) (User
 
 // Token provides an API token for the authenticated user.
 func (c *App) Token(ctx context.Context, kid string) (Token, error) {
-	if c.auth == nil {
+	if c.authbus == nil {
 		return Token{}, errs.Newf(errs.Internal, "authapi not configured")
 	}
 
 	claims := web.GetClaims(ctx)
 
-	tkn, err := c.auth.GenerateToken(kid, claims)
+	tkn, err := c.authbus.GenerateToken(kid, claims)
 	if err != nil {
 		return Token{}, errs.New(errs.Internal, err)
 	}

@@ -36,9 +36,11 @@ func NewRespond(log *logger.Logger) *Respond {
 }
 
 func (respond *Respond) Respond(handlerFunc HandlerFunc) http.HandlerFunc {
+	// This is the decorator/middleware pattern in golang
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := SetTraceID(r.Context(), uuid.NewString())
 
+		// Executes the handlerFunc for the specific route
 		resp, err := handlerFunc(ctx, w, r)
 		if err != nil {
 			if err := responseError(ctx, w, err); err != nil {

@@ -7,8 +7,8 @@ import (
 	"github.com/Housiadas/backend-system/app/domain/productapp"
 	"github.com/Housiadas/backend-system/app/domain/systemapp"
 	"github.com/Housiadas/backend-system/app/domain/userapp"
-	"github.com/Housiadas/backend-system/business/auth"
 	"github.com/Housiadas/backend-system/business/config"
+	"github.com/Housiadas/backend-system/business/domain/authbus"
 	"github.com/Housiadas/backend-system/business/domain/productbus"
 	"github.com/Housiadas/backend-system/business/domain/userbus"
 	"github.com/Housiadas/backend-system/business/web"
@@ -44,7 +44,7 @@ type App struct {
 
 // Business represents the core business layer.
 type Business struct {
-	Auth    *auth.Auth
+	Auth    *authbus.Auth
 	User    *userbus.Business
 	Product *productbus.Business
 }

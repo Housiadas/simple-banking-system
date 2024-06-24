@@ -1,8 +1,9 @@
-package auth
+package authbus
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/google/uuid"
 )
 
