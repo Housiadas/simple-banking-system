@@ -24,11 +24,6 @@ func (cln *Client) rawRequest(ctx context.Context, method string, endpoint strin
 	}
 	base := path.Base(u.Path)
 
-	cln.log.Info(ctx, "http request: started", "method", method, "call", base, "endpoint", endpoint)
-	defer func() {
-		cln.log.Info(ctx, "http request: completed", "status", statusCode)
-	}()
-
 	ctx, span := tracer.AddSpan(ctx, fmt.Sprintf("app.api.authclient.%s", base), attribute.String("endpoint", endpoint))
 	defer func() {
 		span.SetAttributes(attribute.Int("status", statusCode))
@@ -44,7 +39,6 @@ func (cln *Client) rawRequest(ctx context.Context, method string, endpoint strin
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	for key, value := range headers {
-		cln.log.Info(ctx, "http request: header", "key", key, "value", value)
 		req.Header.Set(key, value)
 	}
 
